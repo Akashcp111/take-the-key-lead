@@ -1,29 +1,39 @@
-# Welcome to your Lovable project
+# KEYGUARD — Room Key Issue Register
 
-This project was built with [Lovable](https://lovable.dev).
+An academic prototype for recording room-key issues and returns, with live overdue and due-soon reports. All names and records are fictional. No login, institutional records, or live services are used.
 
-## Build with Lovable
+## Run the prototype
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+This project runs in the provided Lovable preview. For local development, install the project dependencies and start the development server:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install
+bun run dev
 ```
 
-## Built with
+The key register is saved in this browser on this device. Refreshing or reopening the preview keeps changes; use **Reset demo data** on the dashboard to restore the sample register.
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+## Checks
+
+```sh
+bun run test
+```
+
+## Manual demo checklist
+
+1. Open the dashboard and review the six counts.
+2. Open **Overdue** and confirm K101 is listed.
+3. Register K107.
+4. Issue K104 to a recipient with a future due time.
+5. Open **Issued** and confirm the new transaction appears.
+6. Return the key using its transaction ID.
+7. Reopen **Overdue** and confirm the report remains available.
+8. Search for K104 or the recipient.
+9. Open **History** and confirm the issue and return entries.
+10. Refresh or reopen the preview and confirm the register persists.
+
+## Assumptions
+
+- This preview uses the project's supported React app and browser storage instead of a Python/Flask server, keeping the demo self-contained and offline-friendly.
+- Saved records belong to the current browser and are not shared across devices.
+- Resetting the demo replaces the current local records with the fictional sample set.

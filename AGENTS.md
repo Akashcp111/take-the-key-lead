@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project decisions
+
+- Keep KEYGUARD's business rules in a standalone client-side service and persist demo records in browser storage; the academic prototype must work without a live backend.

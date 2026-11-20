@@ -10,33 +10,153 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DueSoonRouteImport } from './routes/due-soon'
+import { Route as HistoryRouteImport } from './routes/history'
+import { Route as IssueRouteImport } from './routes/issue'
+import { Route as IssuedRouteImport } from './routes/issued'
+import { Route as KeysRouteImport } from './routes/keys'
+import { Route as OverdueRouteImport } from './routes/overdue'
+import { Route as ReturnRouteImport } from './routes/return'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as KeysRegisterRouteImport } from './routes/keys.register'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DueSoonRoute = DueSoonRouteImport.update({
+  id: '/due-soon',
+  path: '/due-soon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IssueRoute = IssueRouteImport.update({
+  id: '/issue',
+  path: '/issue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IssuedRoute = IssuedRouteImport.update({
+  id: '/issued',
+  path: '/issued',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeysRoute = KeysRouteImport.update({
+  id: '/keys',
+  path: '/keys',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverdueRoute = OverdueRouteImport.update({
+  id: '/overdue',
+  path: '/overdue',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReturnRoute = ReturnRouteImport.update({
+  id: '/return',
+  path: '/return',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeysRegisterRoute = KeysRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => KeysRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/due-soon': typeof DueSoonRoute
+  '/history': typeof HistoryRoute
+  '/issue': typeof IssueRoute
+  '/issued': typeof IssuedRoute
+  '/keys': typeof KeysRouteWithChildren
+  '/overdue': typeof OverdueRoute
+  '/return': typeof ReturnRoute
+  '/search': typeof SearchRoute
+  '/keys/register': typeof KeysRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/due-soon': typeof DueSoonRoute
+  '/history': typeof HistoryRoute
+  '/issue': typeof IssueRoute
+  '/issued': typeof IssuedRoute
+  '/keys': typeof KeysRouteWithChildren
+  '/overdue': typeof OverdueRoute
+  '/return': typeof ReturnRoute
+  '/search': typeof SearchRoute
+  '/keys/register': typeof KeysRegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/due-soon': typeof DueSoonRoute
+  '/history': typeof HistoryRoute
+  '/issue': typeof IssueRoute
+  '/issued': typeof IssuedRoute
+  '/keys': typeof KeysRouteWithChildren
+  '/overdue': typeof OverdueRoute
+  '/return': typeof ReturnRoute
+  '/search': typeof SearchRoute
+  '/keys/register': typeof KeysRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/due-soon'
+    | '/history'
+    | '/issue'
+    | '/issued'
+    | '/keys'
+    | '/overdue'
+    | '/return'
+    | '/search'
+    | '/keys/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/due-soon'
+    | '/history'
+    | '/issue'
+    | '/issued'
+    | '/keys'
+    | '/overdue'
+    | '/return'
+    | '/search'
+    | '/keys/register'
+  id:
+    | '__root__'
+    | '/'
+    | '/due-soon'
+    | '/history'
+    | '/issue'
+    | '/issued'
+    | '/keys'
+    | '/overdue'
+    | '/return'
+    | '/search'
+    | '/keys/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DueSoonRoute: typeof DueSoonRoute
+  HistoryRoute: typeof HistoryRoute
+  IssueRoute: typeof IssueRoute
+  IssuedRoute: typeof IssuedRoute
+  KeysRoute: typeof KeysRouteWithChildren
+  OverdueRoute: typeof OverdueRoute
+  ReturnRoute: typeof ReturnRoute
+  SearchRoute: typeof SearchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +168,92 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/due-soon': {
+      id: '/due-soon'
+      path: '/due-soon'
+      fullPath: '/due-soon'
+      preLoaderRoute: typeof DueSoonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/issue': {
+      id: '/issue'
+      path: '/issue'
+      fullPath: '/issue'
+      preLoaderRoute: typeof IssueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/issued': {
+      id: '/issued'
+      path: '/issued'
+      fullPath: '/issued'
+      preLoaderRoute: typeof IssuedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keys': {
+      id: '/keys'
+      path: '/keys'
+      fullPath: '/keys'
+      preLoaderRoute: typeof KeysRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overdue': {
+      id: '/overdue'
+      path: '/overdue'
+      fullPath: '/overdue'
+      preLoaderRoute: typeof OverdueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/return': {
+      id: '/return'
+      path: '/return'
+      fullPath: '/return'
+      preLoaderRoute: typeof ReturnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keys/register': {
+      id: '/keys/register'
+      path: '/register'
+      fullPath: '/keys/register'
+      preLoaderRoute: typeof KeysRegisterRouteImport
+      parentRoute: typeof KeysRoute
+    }
   }
 }
 
+interface KeysRouteChildren {
+  KeysRegisterRoute: typeof KeysRegisterRoute
+}
+
+const KeysRouteChildren: KeysRouteChildren = {
+  KeysRegisterRoute: KeysRegisterRoute,
+}
+
+const KeysRouteWithChildren = KeysRoute._addFileChildren(KeysRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DueSoonRoute: DueSoonRoute,
+  HistoryRoute: HistoryRoute,
+  IssueRoute: IssueRoute,
+  IssuedRoute: IssuedRoute,
+  KeysRoute: KeysRouteWithChildren,
+  OverdueRoute: OverdueRoute,
+  ReturnRoute: ReturnRoute,
+  SearchRoute: SearchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
