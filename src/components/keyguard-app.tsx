@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -143,6 +143,37 @@ function statusClass(status: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   return <span className={statusClass(status)}>{status}</span>;
+}
+
+function updateCardTilt(event: ReactPointerEvent<HTMLElement>) {
+  if (event.pointerType === "touch") return;
+  const { currentTarget, clientX, clientY } = event;
+  const bounds = currentTarget.getBoundingClientRect();
+  const x = (clientX - bounds.left) / bounds.width;
+  const y = (clientY - bounds.top) / bounds.height;
+  currentTarget.style.setProperty("--kg-tilt-x", `${(0.5 - y) * 5}deg`);
+  currentTarget.style.setProperty("--kg-tilt-y", `${(x - 0.5) * 6}deg`);
+  currentTarget.style.setProperty("--kg-pointer-x", `${x * 100}%`);
+  currentTarget.style.setProperty("--kg-pointer-y", `${y * 100}%`);
+}
+
+function resetCardTilt(event: ReactPointerEvent<HTMLElement>) {
+  event.currentTarget.style.setProperty("--kg-tilt-x", "0deg");
+  event.currentTarget.style.setProperty("--kg-tilt-y", "0deg");
+  event.currentTarget.style.setProperty("--kg-pointer-x", "50%");
+  event.currentTarget.style.setProperty("--kg-pointer-y", "50%");
+}
+
+function LoadingScreen({ message, error = false }: { message: string; error?: boolean }) {
+  return (
+    <main className="kg-loading" role={error ? "alert" : "status"} aria-live="polite">
+      <div className="kg-loader-card" data-error={error}>
+        <span className="kg-loader-mark" aria-hidden="true"><KeyRound size={22} /></span>
+        <span className="kg-loader-progress" aria-hidden="true" />
+        <p>{message}</p>
+      </div>
+    </main>
+  );
 }
 
 function ActionLink({
@@ -391,7 +422,12 @@ function DashboardPage({
       <PageHeading view="dashboard" action={<span className="kg-topbar-date"><CalendarDays size={17} aria-hidden="true" /> {new Date().toLocaleDateString(undefined, { dateStyle: "full" })}</span>} />
       <section aria-label="Inventory counts" className="kg-stat-grid">
         {stats.map((stat) => (
-          <article className="kg-stat-card" key={stat.label}>
+          <article
+            className="kg-stat-card"
+            key={stat.label}
+            onPointerMove={updateCardTilt}
+            onPointerLeave={resetCardTilt}
+          >
             <span className="kg-stat-icon" aria-hidden="true">{stat.icon}</span>
             <div><p className="kg-stat-label">{stat.label}</p><p className="kg-stat-value">{stat.value}</p></div>
           </article>
@@ -730,20 +766,20 @@ export function KeyguardApp({ view, searchTerm = "" }: KeyguardAppProps) {
   const page = PAGE_DETAILS[view];
 
   if (isSupabaseConfigured && !authLoaded) {
-    return <main className="kg-loading" aria-live="polite"><p>Opening secure sign-in…</p></main>;
+    return <LoadingScreen message="Opening secure sign-in…" />;
   }
   if (isSupabaseConfigured && !supabase) {
-    return <main className="kg-loading"><p>{cloudError || "Cloud sign-in is not configured."}</p></main>;
+    return <LoadingScreen message={cloudError || "Cloud sign-in is not configured."} error />;
   }
   if (isSupabaseConfigured && supabase && !sessionUser) {
     return <AuthPanel supabase={supabase} />;
   }
 
   if (loadFailed) {
-    return <main className="kg-loading"><p>The demo register could not be opened in this browser.</p></main>;
+    return <LoadingScreen message="The demo register could not be opened in this browser." error />;
   }
   if (!service) {
-    return <main className="kg-loading" aria-live="polite"><p>{loadFailed ? "The register could not be loaded." : "Opening the KEYGUARD register…"}</p></main>;
+    return <LoadingScreen message={loadFailed ? "The register could not be loaded." : "Opening the KEYGUARD register…"} error={loadFailed} />;
   }
   void revision;
 

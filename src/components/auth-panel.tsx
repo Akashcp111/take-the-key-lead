@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { KeyRound, ShieldCheck } from "lucide-react";
 
 export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -75,54 +76,81 @@ export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
   return (
     <main className="kg-auth-shell">
       <section className="kg-auth-card" aria-labelledby="kg-auth-title">
-        <span className="kg-auth-kicker">KEYGUARD / PRIVATE REGISTER</span>
-        <h1 id="kg-auth-title">{mode === "sign-in" ? "Sign in to your register" : "Create your register"}</h1>
-        <p>Each account has its own private key records and activity history.</p>
-        <form className="kg-auth-form" onSubmit={submit}>
-          <label htmlFor="kg-auth-email">Email</label>
-          <input
-            id="kg-auth-email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.currentTarget.value)}
-          />
-          <label htmlFor="kg-auth-password">Password</label>
-          <input
-            id="kg-auth-password"
-            type="password"
-            autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-            minLength={6}
-            required
-            value={password}
-            onChange={(event) => setPassword(event.currentTarget.value)}
-          />
-          {message && <p className="kg-auth-message" role="status">{message}</p>}
-          <button className="kg-auth-submit" type="submit" disabled={busy}>
-            {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-          </button>
-        </form>
-        {(mode === "sign-up" || canResend) && (
+        <aside className="kg-auth-visual" aria-label="KEYGUARD private key register">
+          <div className="kg-auth-brand">
+            <span className="kg-auth-brand-mark"><KeyRound size={20} aria-hidden="true" /></span>
+            <span className="kg-auth-brand-name">KEYGUARD<span>KEY CONTROL SYSTEM</span></span>
+            <span className="kg-auth-secure"><span aria-hidden="true" /> PRIVATE</span>
+          </div>
+          <div className="kg-auth-visual-copy">
+            <p className="kg-auth-kicker">SECURE THE HANDOFF</p>
+            <h2>Every key.<br />Always <span>accounted for.</span></h2>
+            <p>Keep your room key inventory and handover history clear, organized, and in one place.</p>
+          </div>
+          <div className="kg-auth-orbit" aria-hidden="true">
+            <span className="kg-auth-orbit-ring kg-auth-orbit-ring-one" />
+            <span className="kg-auth-orbit-ring kg-auth-orbit-ring-two" />
+            <span className="kg-auth-orbit-core"><KeyRound size={38} /></span>
+            <span className="kg-auth-orbit-dot kg-auth-orbit-dot-one" />
+            <span className="kg-auth-orbit-dot kg-auth-orbit-dot-two" />
+          </div>
+          <div className="kg-auth-privacy"><ShieldCheck size={18} aria-hidden="true" /><span>Private by design<small>Your register belongs to your account.</small></span></div>
+        </aside>
+
+        <div className="kg-auth-content">
+          <span className="kg-auth-kicker">PRIVATE REGISTER</span>
+          <h1 id="kg-auth-title">{mode === "sign-in" ? "Welcome back" : "Create your register"}</h1>
+          <p className="kg-auth-intro">{mode === "sign-in" ? "Sign in to continue managing your room keys." : "Set up a private space for your key records."}</p>
+          <form className="kg-auth-form" onSubmit={submit}>
+            <label htmlFor="kg-auth-email">Email address</label>
+            <input
+              id="kg-auth-email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.currentTarget.value)}
+            />
+            <label htmlFor="kg-auth-password">Password</label>
+            <input
+              id="kg-auth-password"
+              type="password"
+              autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+              minLength={6}
+              required
+              value={password}
+              onChange={(event) => setPassword(event.currentTarget.value)}
+            />
+            {message && <p className="kg-auth-message" role="status">{message}</p>}
+            <button className="kg-auth-submit" type="submit" disabled={busy} aria-busy={busy}>
+              {busy && <span className="kg-button-spinner" aria-hidden="true" />}
+              {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
+              {!busy && <span className="kg-auth-submit-arrow" aria-hidden="true">→</span>}
+            </button>
+          </form>
+          {(mode === "sign-up" || canResend) && (
+            <button
+              className="kg-auth-toggle"
+              type="button"
+              onClick={() => void resendConfirmation()}
+              disabled={busy}
+            >
+              Resend confirmation email
+            </button>
+          )}
+          <div className="kg-auth-divider"><span />or<span /></div>
           <button
-            className="kg-auth-toggle"
+            className="kg-auth-toggle kg-auth-mode-toggle"
             type="button"
-            onClick={() => void resendConfirmation()}
-            disabled={busy}
+            onClick={() => {
+              setMessage("");
+              setMode((current) => current === "sign-in" ? "sign-up" : "sign-in");
+            }}
           >
-            Resend confirmation email
+            {mode === "sign-in" ? "New to KEYGUARD? Create an account" : "Already registered? Sign in"}
           </button>
-        )}
-        <button
-          className="kg-auth-toggle"
-          type="button"
-          onClick={() => {
-            setMessage("");
-            setMode((current) => current === "sign-in" ? "sign-up" : "sign-in");
-          }}
-        >
-          {mode === "sign-in" ? "New here? Create an account" : "Already have an account? Sign in"}
-        </button>
+          <p className="kg-auth-footnote"><ShieldCheck size={14} aria-hidden="true" /> Your account keeps its register private.</p>
+        </div>
       </section>
     </main>
   );
