@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Issue a key{% endblock %}
+{% block content %}
+<h1>Issue a room key</h1>
+{% if available_keys %}
+<form method="post" class="form" novalidate>
+  <label for="key_id">Key</label>
+  <select id="key_id" name="key_id" required>
+    <option value="" disabled {{ 'selected' if not form.get('key_id') else '' }}>Select an available key</option>
+    {% for k in available_keys %}
+    <option value="{{ k.key_id }}" {{ 'selected' if form.get('key_id') == k.key_id else '' }}>{{ k.key_id }} — {{ k.room }} ({{ k.location }})</option>
+    {% endfor %}
+  </select>
+
+  <label for="recipient">Recipient name</label>
+  <input id="recipient" name="recipient" required maxlength="80" value="{{ form.get('recipient', '') }}">
+
+  <label for="recipient_id">Recipient ID</label>
+  <input id="recipient_id" name="recipient_id" required maxlength="40" value="{{ form.get('recipient_id', '') }}">
+
+  <label for="due_datetime">Due date &amp; time</label>
+  <input id="due_datetime" name="due_datetime" type="datetime-local" required
+         min="{{ now_iso }}" value="{{ form.get('due_datetime', '') }}">
+
+  <button type="submit" class="btn btn-primary">Issue key</button>
+</form>
+{% else %}
+<p class="empty-state">No keys are available right now. Register a new key or wait for a return.</p>
+{% endif %}
+{% endblock %}

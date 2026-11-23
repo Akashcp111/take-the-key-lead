@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block title %}Currently issued{% endblock %} {% block content %}
+<h1>Currently issued keys</h1>
+{% if transactions %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>TX ID</th>
+        <th>Key</th>
+        <th>Recipient</th>
+        <th>Due</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transactions %}
+      <tr>
+        <td>{{ t.transaction_id }}</td>
+        <td>{{ t.key_id }}</td>
+        <td>{{ t.recipient }} ({{ t.recipient_id }})</td>
+        <td>{{ t.due_date }}</td>
+        <td>
+          <span class="badge badge-{{ t.display_status|lower|replace(' ', '-') }}"
+            >{{ t.display_status }}</span
+          >
+        </td>
+        <td>
+          <form
+            method="post"
+            action="{{ url_for('return_from_list', reference=t.transaction_id) }}"
+            onsubmit="return confirm('Return this key?');"
+          >
+            <button type="submit" class="btn btn-small">Return</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state">No keys are currently issued.</p>
+{% endif %} {% endblock %}

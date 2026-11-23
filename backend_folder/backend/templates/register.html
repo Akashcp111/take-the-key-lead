@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Register a key{% endblock %} {% block content %}
+<h1>Register a room key</h1>
+<form method="post" class="form" novalidate>
+  <label for="key_id">Key ID</label>
+  <input
+    id="key_id"
+    name="key_id"
+    required
+    pattern="^[Kk]\d{3}$"
+    maxlength="4"
+    placeholder="K107"
+    value="{{ form.get('key_id', '') }}"
+  />
+
+  <label for="room">Room</label>
+  <input id="room" name="room" required maxlength="80" value="{{ form.get('room', '') }}" />
+
+  <label for="location">Location</label>
+  <input
+    id="location"
+    name="location"
+    required
+    maxlength="80"
+    value="{{ form.get('location', '') }}"
+  />
+
+  <button type="submit" class="btn btn-primary">Register key</button>
+</form>
+{% endblock %}

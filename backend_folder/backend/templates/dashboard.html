@@ -1,0 +1,71 @@
+{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block content %}
+<h1>Dashboard</h1>
+
+<div class="cards">
+  <div class="stat-card">
+    <span class="stat-value">{{ counts.total }}</span><span class="stat-label">Total keys</span>
+  </div>
+  <div class="stat-card stat-available">
+    <span class="stat-value">{{ counts.available }}</span><span class="stat-label">Available</span>
+  </div>
+  <div class="stat-card stat-issued">
+    <span class="stat-value">{{ counts.issued }}</span><span class="stat-label">Issued</span>
+  </div>
+  <div class="stat-card stat-overdue">
+    <span class="stat-value">{{ counts.overdue }}</span><span class="stat-label">Overdue</span>
+  </div>
+  <div class="stat-card stat-due-soon">
+    <span class="stat-value">{{ counts.due_soon }}</span><span class="stat-label">Due soon</span>
+  </div>
+  <div class="stat-card stat-returned">
+    <span class="stat-value">{{ counts.returned }}</span><span class="stat-label">Returned</span>
+  </div>
+</div>
+
+<div class="actions-row">
+  <a class="btn btn-primary" href="{{ url_for('issue') }}">Issue a key</a>
+  <a class="btn" href="{{ url_for('return_key') }}">Return a key</a>
+  <a class="btn" href="{{ url_for('overdue') }}">Overdue report</a>
+</div>
+
+<section>
+  <h2>Overdue preview</h2>
+  {% if overdue_preview %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>TX ID</th>
+          <th>Key</th>
+          <th>Recipient</th>
+          <th>Due</th>
+          <th>Overdue by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in overdue_preview %}
+        <tr>
+          <td>{{ t.transaction_id }}</td>
+          <td>{{ t.key_id }}</td>
+          <td>{{ t.recipient }}</td>
+          <td>{{ t.due_date }}</td>
+          <td><span class="badge badge-overdue">{{ t.overdue_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a href="{{ url_for('overdue') }}">View full overdue report &rarr;</a></p>
+  {% else %}
+  <p class="empty-state">No overdue keys.</p>
+  {% endif %}
+</section>
+
+<form
+  method="post"
+  action="{{ url_for('reset_demo') }}"
+  onsubmit="return confirm('Reset all sample data? This cannot be undone.');"
+>
+  <button type="submit" class="btn btn-ghost btn-small">Reset demo data</button>
+</form>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block title %}Key inventory{% endblock %} {% block content %}
+<div class="page-header">
+  <h1>Key inventory</h1>
+  <a class="btn btn-primary" href="{{ url_for('register_key') }}">Register a key</a>
+</div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Key ID</th>
+        <th>Room</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for k in keys %}
+      <tr>
+        <td>{{ k.key_id }}</td>
+        <td>{{ k.room }}</td>
+        <td>{{ k.location }}</td>
+        <td>
+          <span class="badge badge-{{ 'available' if k.status == 'AVAILABLE' else 'issued' }}"
+            >{{ k.status }}</span
+          >
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Return a key{% endblock %}
+{% block content %}
+<h1>Return a room key</h1>
+{% if active %}
+<form method="post" class="form" novalidate>
+  <label for="reference">Active issue</label>
+  <select id="reference" name="reference" required>
+    <option value="" disabled {{ 'selected' if not form.get('reference') else '' }}>Select a transaction</option>
+    {% for t in active %}
+    <option value="{{ t.transaction_id }}" {{ 'selected' if form.get('reference') == t.transaction_id else '' }}>
+      {{ t.transaction_id }} — {{ t.key_id }} — {{ t.recipient }} — due {{ t.due_date }}
+    </option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-primary">Return key</button>
+</form>
+{% else %}
+<p class="empty-state">No keys are currently issued.</p>
+{% endif %}
+{% endblock %}

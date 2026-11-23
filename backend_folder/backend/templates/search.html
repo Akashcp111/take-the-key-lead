@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Search{% endblock %} {% block content %}
+<h1>Search records</h1>
+<form method="get" class="form-inline">
+  <input
+    type="search"
+    name="q"
+    value="{{ term }}"
+    placeholder="Key ID, room, recipient, transaction ID..."
+    aria-label="Search term"
+  />
+  <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+{% if term %}
+<section>
+  <h2>Keys ({{ results['keys']|length }})</h2>
+  {% if results['keys'] %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Key ID</th>
+          <th>Room</th>
+          <th>Location</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for k in results['keys'] %}
+        <tr>
+          <td>{{ k.key_id }}</td>
+          <td>{{ k.room }}</td>
+          <td>{{ k.location }}</td>
+          <td>
+            <span class="badge badge-{{ 'available' if k.status == 'AVAILABLE' else 'issued' }}"
+              >{{ k.status }}</span
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No matching keys.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Transactions ({{ results['transactions']|length }})</h2>
+  {% if results['transactions'] %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>TX ID</th>
+          <th>Key</th>
+          <th>Recipient</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in results['transactions'] %}
+        <tr>
+          <td>{{ t.transaction_id }}</td>
+          <td>{{ t.key_id }}</td>
+          <td>{{ t.recipient }}</td>
+          <td>{{ t.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">No matching transactions.</p>
+  {% endif %}
+</section>
+{% else %}
+<p class="empty-state">Type something above to search keys and transactions.</p>
+{% endif %} {% endblock %}

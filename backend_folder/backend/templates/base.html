@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Dashboard{% endblock %} · KEYGUARD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="{{ url_for('dashboard') }}">KEYGUARD</a>
+        <nav class="nav">
+          <a
+            href="{{ url_for('dashboard') }}"
+            class="{{ 'active' if request.endpoint == 'dashboard' else '' }}"
+            >Dashboard</a
+          >
+          <a
+            href="{{ url_for('keys') }}"
+            class="{{ 'active' if request.endpoint in ('keys', 'register_key') else '' }}"
+            >Keys</a
+          >
+          <a
+            href="{{ url_for('issue') }}"
+            class="{{ 'active' if request.endpoint == 'issue' else '' }}"
+            >Issue</a
+          >
+          <a
+            href="{{ url_for('return_key') }}"
+            class="{{ 'active' if request.endpoint == 'return_key' else '' }}"
+            >Return</a
+          >
+          <a
+            href="{{ url_for('issued') }}"
+            class="{{ 'active' if request.endpoint == 'issued' else '' }}"
+            >Issued</a
+          >
+          <a
+            href="{{ url_for('overdue') }}"
+            class="{{ 'active' if request.endpoint == 'overdue' else '' }}"
+            >Overdue</a
+          >
+          <a
+            href="{{ url_for('due_soon') }}"
+            class="{{ 'active' if request.endpoint == 'due_soon' else '' }}"
+            >Due soon</a
+          >
+          <a
+            href="{{ url_for('history') }}"
+            class="{{ 'active' if request.endpoint == 'history' else '' }}"
+            >History</a
+          >
+        </nav>
+        <form class="search-form" action="{{ url_for('search') }}" method="get">
+          <input
+            type="search"
+            name="q"
+            placeholder="Search records..."
+            value="{{ request.args.get('q', '') }}"
+            aria-label="Search records"
+          />
+          <button type="submit" class="btn btn-small">Go</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+      <div class="flash-area" role="alert">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">Academic prototype — sample data only</footer>
+  </body>
+</html>

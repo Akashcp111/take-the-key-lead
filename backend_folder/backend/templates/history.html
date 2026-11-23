@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block title %}History{% endblock %} {% block content %}
+<h1>Transaction &amp; audit history</h1>
+
+<section>
+  <h2>Transactions</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>TX ID</th>
+          <th>Key</th>
+          <th>Recipient</th>
+          <th>Issued</th>
+          <th>Due</th>
+          <th>Returned</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transactions %}
+        <tr>
+          <td>{{ t.transaction_id }}</td>
+          <td>{{ t.key_id }}</td>
+          <td>{{ t.recipient }}</td>
+          <td>{{ t.issue_date }}</td>
+          <td>{{ t.due_date }}</td>
+          <td>{{ t.return_date or '—' }}</td>
+          <td>
+            <span class="badge badge-{{ 'returned' if t.status == 'RETURNED' else 'issued' }}"
+              >{{ t.status }}</span
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Audit log</h2>
+  <ul class="audit-list">
+    {% for e in audit_events %}
+    <li>
+      <span class="audit-time">{{ e.timestamp }}</span> — <strong>{{ e.action }}</strong> — {{
+      e.description }}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
