@@ -20,9 +20,12 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { AuthPanel } from "@/components/auth-panel";
 import { KeyGuardError } from "@/lib/keyguard-errors";
 import {
   KeyService,
+  isStoreData,
+  STORAGE_KEY,
   type ActiveTransaction,
   type AuditEvent,
   type DashboardCounts,
@@ -31,6 +34,9 @@ import {
   type KeyTransaction,
   type OverdueTransaction,
 } from "@/lib/keyguard-service";
+import { isSupabaseConfigured, getSupabaseClient } from "@/lib/supabase";
+import { loadRegisterState, saveRegisterState, userRegisterStorage } from "@/lib/supabase-register-store";
+import type { User } from "@supabase/supabase-js";
 
 export type KeyguardView =
   | "dashboard"
@@ -614,13 +620,108 @@ export function KeyguardApp({ view, searchTerm = "" }: KeyguardAppProps) {
   const [loadFailed, setLoadFailed] = useState(false);
   const [revision, setRevision] = useState(0);
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [sessionUser, setSessionUser] = useState<User | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(!isSupabaseConfigured);
+  const [cloudError, setCloudError] = useState("");
+  const supabase = getSupabaseClient();
+  const sessionUserId = sessionUser?.id;
 
   useEffect(() => {
-    try {
-      setService(new KeyService(window.localStorage));
-    } catch {
-      setLoadFailed(true);
+    if (!isSupabaseConfigured) return;
+    if (!supabase) {
+      setCloudError("Cloud sign-in is unavailable. Check the Supabase environment settings.");
+      setAuthLoaded(true);
+      return;
     }
+
+    let active = true;
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) setCloudError(error.message);
+      setSessionUser(data.session?.user ?? null);
+      setAuthLoaded(true);
+    }).catch((error: unknown) => {
+      if (!active) return;
+      setCloudError(error instanceof Error ? error.message : "Could not open your cloud session.");
+      setAuthLoaded(true);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setSessionUser(session?.user ?? null);
+      setAuthLoaded(true);
+      setCloudError("");
+      setService(null);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (!authLoaded) return;
+    if (isSupabaseConfigured && !sessionUserId) {
+      setService(null);
+      setLoadFailed(false);
+      return;
+    }
+
+    let active = true;
+    const userId = sessionUserId;
+    const storage = userId ? userRegisterStorage(userId) : window.localStorage;
+
+    async function openRegister() {
+      try {
+        let remoteState: unknown | null = null;
+        if (userId) remoteState = await loadRegisterState(userId);
+        if (!active) return;
+
+        if (remoteState !== null) {
+          if (!isStoreData(remoteState)) {
+            throw new Error("The saved register has an unexpected format. Your data has not been changed.");
+          }
+          storage.setItem(STORAGE_KEY, JSON.stringify(remoteState));
+        }
+
+        let writeQueue = Promise.resolve();
+        const persist = userId
+          ? (state: Parameters<typeof saveRegisterState>[1]) => {
+              writeQueue = writeQueue
+                .then(() => saveRegisterState(userId, state))
+                .then(() => {
+                  if (active) setCloudError("");
+                })
+                .catch((error: unknown) => {
+                  if (active) {
+                    setCloudError(error instanceof Error ? `Cloud save failed: ${error.message}` : "Cloud save failed.");
+                  }
+                });
+            }
+          : undefined;
+        const hadLocalState = storage.getItem(STORAGE_KEY) !== null;
+        const nextService = new KeyService(storage, new Date(), persist);
+        setService(nextService);
+        setLoadFailed(false);
+
+        if (userId && remoteState === null && hadLocalState) {
+          persist?.(nextService.get_snapshot());
+        }
+      } catch (error) {
+        if (!active) return;
+        setCloudError(error instanceof Error ? error.message : "Could not load the cloud register.");
+        setLoadFailed(true);
+      }
+    }
+
+    void openRegister();
+    return () => {
+      active = false;
+    };
+  }, [authLoaded, sessionUserId]);
+
+  useEffect(() => {
     const timer = window.setInterval(() => setRevision((current) => current + 1), 60_000);
     return () => window.clearInterval(timer);
   }, []);
@@ -628,11 +729,21 @@ export function KeyguardApp({ view, searchTerm = "" }: KeyguardAppProps) {
   const changed = () => setRevision((current) => current + 1);
   const page = PAGE_DETAILS[view];
 
+  if (isSupabaseConfigured && !authLoaded) {
+    return <main className="kg-loading" aria-live="polite"><p>Opening secure sign-in…</p></main>;
+  }
+  if (isSupabaseConfigured && !supabase) {
+    return <main className="kg-loading"><p>{cloudError || "Cloud sign-in is not configured."}</p></main>;
+  }
+  if (isSupabaseConfigured && supabase && !sessionUser) {
+    return <AuthPanel supabase={supabase} />;
+  }
+
   if (loadFailed) {
     return <main className="kg-loading"><p>The demo register could not be opened in this browser.</p></main>;
   }
   if (!service) {
-    return <main className="kg-loading" aria-live="polite"><p>Opening the KEYGUARD register…</p></main>;
+    return <main className="kg-loading" aria-live="polite"><p>{loadFailed ? "The register could not be loaded." : "Opening the KEYGUARD register…"}</p></main>;
   }
   void revision;
 
@@ -697,8 +808,14 @@ export function KeyguardApp({ view, searchTerm = "" }: KeyguardAppProps) {
             <Search size={16} aria-hidden="true" />
             <input id="nav-search" name="q" type="search" placeholder="Search records" />
           </form>
+          {sessionUser && supabase && (
+            <button className="kg-sign-out" type="button" onClick={() => { void supabase.auth.signOut(); }}>
+              Sign out
+            </button>
+          )}
         </div>
         <div className="kg-content">
+          {cloudError && <div className="kg-cloud-error" role="status">{cloudError}</div>}
           {notice && <NoticeBanner notice={notice} />}
           {body}
           <footer className="kg-footer">Academic prototype - sample data only</footer>

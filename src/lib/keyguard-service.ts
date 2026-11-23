@@ -57,7 +57,7 @@ export interface SearchResults {
   transactions: Array<KeyTransaction & { room: string; location: string; display_status: string }>;
 }
 
-interface StoreData {
+export interface StoreData {
   keys: KeyRecord[];
   transactions: KeyTransaction[];
   audit_events: AuditEvent[];
@@ -72,9 +72,9 @@ export interface DashboardCounts {
   returned: number;
 }
 
-const STORAGE_KEY = "keyguard.academic-demo.v1";
+export const STORAGE_KEY = "keyguard.academic-demo.v1";
 
-function isStoreData(value: unknown): value is StoreData {
+export function isStoreData(value: unknown): value is StoreData {
   if (typeof value !== "object" || value === null) return false;
   const record = value as Record<string, unknown>;
   return (
@@ -169,6 +169,7 @@ export class KeyService {
   constructor(
     private readonly storage: Pick<Storage, "getItem" | "setItem">,
     now: Date = new Date(),
+    private readonly onPersist?: (data: StoreData) => void,
   ) {
     const saved = storage.getItem(STORAGE_KEY);
     let loaded: StoreData | null = null;
@@ -405,6 +406,10 @@ export class KeyService {
     return sortedNewest(this.data.audit_events, (event) => event.timestamp).map((event) => ({ ...event }));
   }
 
+  get_snapshot(): StoreData {
+    return JSON.parse(JSON.stringify(this.data)) as StoreData;
+  }
+
   reset_demo_data(now: Date = new Date()): void {
     this.persist(seedData(now));
   }
@@ -425,5 +430,6 @@ export class KeyService {
   private persist(next: StoreData): void {
     this.storage.setItem(STORAGE_KEY, JSON.stringify(next));
     this.data = next;
+    this.onPersist?.(next);
   }
 }
