@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
@@ -7,6 +7,42 @@ export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [canResend, setCanResend] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const errorCode = params.get("error_code");
+    if (errorCode === "otp_expired") {
+      setCanResend(true);
+      setMessage("That confirmation link has expired. Enter your email and request a new one below.");
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  async function resendConfirmation() {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      setMessage("Enter your email address first, then request a new confirmation email.");
+      return;
+    }
+
+    setMessage("");
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: normalizedEmail,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setCanResend(true);
+      setMessage("A new confirmation email was sent. Open the latest email to confirm your account.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not resend the confirmation email.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -15,12 +51,19 @@ export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
 
     try {
       if (mode === "sign-in") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) throw error;
       } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
         if (error) throw error;
-        if (!data.session) setMessage("Check your email to confirm your account, then sign in.");
+        if (!data.session) {
+          setCanResend(true);
+          setMessage("Check your email to confirm your account. Use the latest confirmation email.");
+        }
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Authentication failed. Try again.");
@@ -60,6 +103,16 @@ export function AuthPanel({ supabase }: { supabase: SupabaseClient }) {
             {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
           </button>
         </form>
+        {(mode === "sign-up" || canResend) && (
+          <button
+            className="kg-auth-toggle"
+            type="button"
+            onClick={() => void resendConfirmation()}
+            disabled={busy}
+          >
+            Resend confirmation email
+          </button>
+        )}
         <button
           className="kg-auth-toggle"
           type="button"

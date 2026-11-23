@@ -23,6 +23,6 @@ VITE_SUPABASE_URL=https://lxflrxwsnvksgvanvnjd.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<Supabase publishable key>
 ```
 
-After deployment, set the Supabase Auth Site URL to the Vercel production URL and add the production and preview Vercel URLs to the allowed redirect URLs.
+For email confirmation, set the Supabase Auth Site URL to `https://take-the-key-lead.vercel.app` and add `https://take-the-key-lead.vercel.app/**` to the allowed redirect URLs. Add only the exact preview domains you intend to use. The sign-up flow also passes the current site origin as its redirect target, and users can request a replacement confirmation email if a link expires.
 
 The app supports browser-only demo mode when these variables are absent. When configured, accounts sign in before opening the cloud-backed register.
